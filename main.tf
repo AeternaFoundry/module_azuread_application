@@ -2,23 +2,23 @@ resource "azuread_application" "applications" {
   for_each = var.applications
 
   display_name                   = each.value.display_name
-  tags                           = each.value.tags
-  support_url                    = each.value.support_url
-  sign_in_audience               = each.value.sign_in_audience
-  service_management_reference   = each.value.service_management_reference
-  privacy_statement_url          = each.value.privacy_statement_url
-  prevent_duplicate_names        = each.value.prevent_duplicate_names
-  owners                         = each.value.owners
-  template_id                    = each.value.template_id
-  oauth2_post_response_required  = each.value.oauth2_post_response_required
-  marketing_url                  = each.value.marketing_url
-  logo_image                     = each.value.logo_image
-  identifier_uris                = each.value.identifier_uris
-  group_membership_claims        = each.value.group_membership_claims
-  fallback_public_client_enabled = each.value.fallback_public_client_enabled
-  device_only_auth_enabled       = each.value.device_only_auth_enabled
   description                    = each.value.description
+  device_only_auth_enabled       = each.value.device_only_auth_enabled
+  fallback_public_client_enabled = each.value.fallback_public_client_enabled
+  group_membership_claims        = each.value.group_membership_claims
+  identifier_uris                = each.value.identifier_uris
+  logo_image                     = each.value.logo_image
+  marketing_url                  = each.value.marketing_url
   notes                          = each.value.notes
+  oauth2_post_response_required  = each.value.oauth2_post_response_required
+  owners                         = each.value.owners
+  prevent_duplicate_names        = each.value.prevent_duplicate_names
+  privacy_statement_url          = each.value.privacy_statement_url
+  service_management_reference   = each.value.service_management_reference
+  sign_in_audience               = each.value.sign_in_audience
+  support_url                    = each.value.support_url
+  tags                           = each.value.tags
+  template_id                    = each.value.template_id
   terms_of_service_url           = each.value.terms_of_service_url
 
   dynamic "api" {
@@ -132,6 +132,16 @@ resource "azuread_application" "applications" {
     for_each = each.value.single_page_application != null ? [each.value.single_page_application] : []
     content {
       redirect_uris = single_page_application.value.redirect_uris
+    }
+  }
+
+  dynamic "timeouts" {
+    for_each = each.value.timeouts != null ? [each.value.timeouts] : []
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
     }
   }
 

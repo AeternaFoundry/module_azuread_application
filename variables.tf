@@ -76,6 +76,11 @@ Optional:
         - resource_app_id (required)
     - single_page_application (block):
         - redirect_uris (optional)
+    - timeouts (block):
+        - create (optional)
+        - delete (optional)
+        - read (optional)
+        - update (optional)
     - web (block):
         - homepage_url (optional)
         - implicit_grant (optional, block):
@@ -87,23 +92,23 @@ EOT
 
   type = map(object({
     display_name                   = string
-    tags                           = optional(set(string))
-    support_url                    = optional(string)
-    sign_in_audience               = optional(string)
-    service_management_reference   = optional(string)
-    privacy_statement_url          = optional(string)
-    prevent_duplicate_names        = optional(bool)
-    owners                         = optional(set(string))
-    template_id                    = optional(string)
-    oauth2_post_response_required  = optional(bool)
-    marketing_url                  = optional(string)
-    logo_image                     = optional(string)
-    identifier_uris                = optional(set(string))
-    group_membership_claims        = optional(set(string))
-    fallback_public_client_enabled = optional(bool)
-    device_only_auth_enabled       = optional(bool)
     description                    = optional(string)
+    device_only_auth_enabled       = optional(bool)
+    fallback_public_client_enabled = optional(bool)
+    group_membership_claims        = optional(set(string))
+    identifier_uris                = optional(set(string))
+    logo_image                     = optional(string)
+    marketing_url                  = optional(string)
     notes                          = optional(string)
+    oauth2_post_response_required  = optional(bool)
+    owners                         = optional(set(string))
+    prevent_duplicate_names        = optional(bool)
+    privacy_statement_url          = optional(string)
+    service_management_reference   = optional(string)
+    sign_in_audience               = optional(string)
+    support_url                    = optional(string)
+    tags                           = optional(set(string))
+    template_id                    = optional(string)
     terms_of_service_url           = optional(string)
     api = optional(object({
       known_client_applications = optional(set(string))
@@ -171,6 +176,12 @@ EOT
     })))
     single_page_application = optional(object({
       redirect_uris = optional(set(string))
+    }))
+    timeouts = optional(object({
+      create = optional(string)
+      delete = optional(string)
+      read   = optional(string)
+      update = optional(string)
     }))
     web = optional(object({
       homepage_url = optional(string)
@@ -273,10 +284,10 @@ EOT
   validation {
     condition = alltrue([
       for k, v in var.applications : (
-        v.description == null || (length(v.description) >= 0 && length(v.description) <= 1024)
+        v.description == null || (length(v.description) <= 1024)
       )
     ])
-    error_message = "must be between 0 and 1024 characters"
+    error_message = "must be at most 1024 characters"
   }
   validation {
     condition = alltrue([
@@ -308,7 +319,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.access_token == null || alltrue([for item in v.optional_claims.access_token : (item.source == null || (contains(["user"], item.source)))]))
       )
     ])
-    error_message = "must be one of: user"
+    error_message = "must be one of: \"user\""
   }
   validation {
     condition = alltrue([
@@ -316,7 +327,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.access_token == null || alltrue([for item in v.optional_claims.access_token : (item.additional_properties == null || (alltrue([for x in item.additional_properties : contains(["cloud_displayname", "dns_domain_and_sam_account_name", "emit_as_roles", "include_externally_authenticated_upn_without_hash", "include_externally_authenticated_upn", "max_size_limit", "netbios_domain_and_sam_account_name", "on_premise_security_identifier", "sam_account_name", "use_guid"], x)])))]))
       )
     ])
-    error_message = "must be one of: cloud_displayname, dns_domain_and_sam_account_name, emit_as_roles, include_externally_authenticated_upn_without_hash, include_externally_authenticated_upn, max_size_limit, netbios_domain_and_sam_account_name, on_premise_security_identifier, sam_account_name, use_guid"
+    error_message = "must be one of: \"cloud_displayname\", \"dns_domain_and_sam_account_name\", \"emit_as_roles\", \"include_externally_authenticated_upn_without_hash\", \"include_externally_authenticated_upn\", \"max_size_limit\", \"netbios_domain_and_sam_account_name\", \"on_premise_security_identifier\", \"sam_account_name\", \"use_guid\""
   }
   validation {
     condition = alltrue([
@@ -324,7 +335,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.id_token == null || alltrue([for item in v.optional_claims.id_token : (item.source == null || (contains(["user"], item.source)))]))
       )
     ])
-    error_message = "must be one of: user"
+    error_message = "must be one of: \"user\""
   }
   validation {
     condition = alltrue([
@@ -332,7 +343,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.id_token == null || alltrue([for item in v.optional_claims.id_token : (item.additional_properties == null || (alltrue([for x in item.additional_properties : contains(["cloud_displayname", "dns_domain_and_sam_account_name", "emit_as_roles", "include_externally_authenticated_upn_without_hash", "include_externally_authenticated_upn", "max_size_limit", "netbios_domain_and_sam_account_name", "on_premise_security_identifier", "sam_account_name", "use_guid"], x)])))]))
       )
     ])
-    error_message = "must be one of: cloud_displayname, dns_domain_and_sam_account_name, emit_as_roles, include_externally_authenticated_upn_without_hash, include_externally_authenticated_upn, max_size_limit, netbios_domain_and_sam_account_name, on_premise_security_identifier, sam_account_name, use_guid"
+    error_message = "must be one of: \"cloud_displayname\", \"dns_domain_and_sam_account_name\", \"emit_as_roles\", \"include_externally_authenticated_upn_without_hash\", \"include_externally_authenticated_upn\", \"max_size_limit\", \"netbios_domain_and_sam_account_name\", \"on_premise_security_identifier\", \"sam_account_name\", \"use_guid\""
   }
   validation {
     condition = alltrue([
@@ -340,7 +351,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.saml2_token == null || alltrue([for item in v.optional_claims.saml2_token : (item.source == null || (contains(["user"], item.source)))]))
       )
     ])
-    error_message = "must be one of: user"
+    error_message = "must be one of: \"user\""
   }
   validation {
     condition = alltrue([
@@ -348,7 +359,7 @@ EOT
         v.optional_claims == null || (v.optional_claims.saml2_token == null || alltrue([for item in v.optional_claims.saml2_token : (item.additional_properties == null || (alltrue([for x in item.additional_properties : contains(["cloud_displayname", "dns_domain_and_sam_account_name", "emit_as_roles", "include_externally_authenticated_upn_without_hash", "include_externally_authenticated_upn", "max_size_limit", "netbios_domain_and_sam_account_name", "on_premise_security_identifier", "sam_account_name", "use_guid"], x)])))]))
       )
     ])
-    error_message = "must be one of: cloud_displayname, dns_domain_and_sam_account_name, emit_as_roles, include_externally_authenticated_upn_without_hash, include_externally_authenticated_upn, max_size_limit, netbios_domain_and_sam_account_name, on_premise_security_identifier, sam_account_name, use_guid"
+    error_message = "must be one of: \"cloud_displayname\", \"dns_domain_and_sam_account_name\", \"emit_as_roles\", \"include_externally_authenticated_upn_without_hash\", \"include_externally_authenticated_upn\", \"max_size_limit\", \"netbios_domain_and_sam_account_name\", \"on_premise_security_identifier\", \"sam_account_name\", \"use_guid\""
   }
   validation {
     condition = alltrue([
